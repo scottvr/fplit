@@ -89,7 +89,7 @@ Running:
 python fplit.py demo.py
 ```
 
-Creates separate files for each function call, preserving necessary setup:
+Creates separate files for each function call, preserving necessary setup, comments, and print statements:
 ```python
 ### created file: process_data_demo.py
 import logging
