@@ -49,7 +49,7 @@ usage: fplit.py [-h] [-o OUTPUT_DIR] [-v] [--wrap-main] [--no-setup]
                 source_file
 
 positional arguments:
-  source_file           Python source file to split
+  source_file             Python source file to split
 
 optional arguments:
   -h, --help              show help message and exit
