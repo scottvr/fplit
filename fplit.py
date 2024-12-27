@@ -633,28 +633,7 @@ class FplitParser:
             print(f"\n📚 Created {len(created_files)} files:")
             for file in created_files:
                 print(f"   - {file.name}")
-    try:
-        # First set up pattern loading
-        pattern_loader = PatternLoader(
-            skip_user_patterns=args.skip_user_patterns,
-            skip_project_patterns=args.skip_project_patterns,
-            patterns_dir=args.patterns_dir
-        )
-        
-        # Then create parser with both pattern loader and analysis config
-        splitter = FplitParser(
-            source_file=args.source_file,
-            pattern_loader=pattern_loader,
-            similarity_threshold=args.similarity_threshold
-        )
-        
-        if args.verbose:
-            print(f"🔍 Analyzing {args.source_file}...")
-        
-        splitter.split_into_files(
-            output_dir=args.output_dir,
-            verbosity=args.verbose
-        )
+
 if __name__ == '__main__':
     import argparse
     
