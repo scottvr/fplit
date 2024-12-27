@@ -1,0 +1,239 @@
+"""
+Default patterns shipped with fplit.
+These patterns identify common setup code for popular Python libraries.
+"""
+
+def patterns():
+    return {
+        # Logging Configuration
+        # MATCH: Logger creation and level setting, propagation config
+        # SKIP: Actual log message calls
+        'logging_config': lambda n: (
+            FplitParser._is_call_to(n, 'logging', 'basicConfig') or
+            FplitParser._is_call_to(n, 'logging', 'setLevel') or
+            FplitParser._is_call_to(n, 'logging', 'getLogger') or
+            FplitParser._is_stored_object_assignment(n, 'logging', 'getLogger') or
+            FplitParser._is_method_on_stored_object(n, ['setLevel', 'propagate'])
+        ),
+
+        # Matplotlib/Pyplot Setup
+        # MATCH: Style settings, backend config, default figure params
+        # SKIP: Actual plotting calls, data visualization, saving figures
+        'matplotlib_config': lambda n: (
+            FplitParser._is_call_to(n, 'matplotlib', 'use') or
+            FplitParser._is_call_to(n, 'plt', 'style.use') or
+            (isinstance(n, ast.Assign) and  # rcParams assignment
+             isinstance(n.targets[0], ast.Subscript) and
+             isinstance(n.targets[0].value, ast.Attribute) and
+             isinstance(n.targets[0].value.value, ast.Name) and
+             n.targets[0].value.value.id == 'plt' and
+             n.targets[0].value.attr == 'rcParams')
+        ),
+
+        # Pandas Configuration
+        # MATCH: Display options, default settings
+        # SKIP: Actual data operations, DataFrame creation/manipulation
+        'pandas_config': lambda n: (
+            FplitParser._is_call_to(n, 'pd', 'set_option') or
+            FplitParser._is_call_to(n, 'pd', 'options.display')
+        ),
+
+        # Requests Setup
+        # MATCH: Session creation and base config (auth, headers)
+        # SKIP: Actual API calls, request sending
+        'requests_config': lambda n: (
+            FplitParser._is_stored_object_assignment(n, 'requests', 'Session') or
+            (FplitParser._is_method_on_stored_object(n, ['auth', 'headers', 'verify', 'cert']) and
+             not FplitParser._is_method_on_stored_object(n, ['get', 'post', 'put', 'delete', 'patch']))
+        ),
+
+        # NumPy
+        'numpy_config': lambda n: (
+            FplitParser._is_call_to(n, 'np', 'set_printoptions') or
+            FplitParser._is_call_to(n, 'np', 'random.seed.')
+        ),
+        
+        # Pandas
+        'pandas_options': lambda n: FplitParser._is_call_to(n, 'pd', 'set_option'),
+        
+        # Matplotlib
+        'matplotlib_backend': lambda n: FplitParser._is_call_to(n, 'matplotlib', 'use'),
+        'plt_style': lambda n: FplitParser._is_call_to(n, 'plt', 'style.use'),
+        'plt_rcparams': lambda n: isinstance(n, ast.Assign) and 
+                       isinstance(n.targets[0], ast.Subscript) and
+                       isinstance(n.targets[0].value, ast.Attribute) and
+                       isinstance(n.targets[0].value.value, ast.Name) and
+                       n.targets[0].value.value.id == 'plt' and
+                       n.targets[0].value.attr == 'rcParams',
+        
+        # TensorFlow Setup
+        # MATCH: GPU/device config, random seeds, basic TF settings
+        # SKIP: Model creation, training, inference
+        'tf_config': lambda n: (
+            FplitParser._is_call_to(n, 'tf', 'config.set_visible_devices') or
+            FplitParser._is_call_to(n, 'tf', 'random.set_seed') or
+            FplitParser._is_call_to(n, 'tf', 'config.experimental.enable_op_determinism')
+        ),
+
+        # PyTorch Setup
+        # MATCH: Device selection, random seeds, cudnn config
+        # SKIP: Model ops, tensor operations, training
+        'torch_config': lambda n: (
+            FplitParser._is_call_to(n, 'torch', 'manual_seed') or
+            FplitParser._is_call_to(n, 'torch', 'cuda.set_device') or
+            FplitParser._is_attr_assign(n, 'torch', 'backends.cudnn.deterministic')
+        ),
+
+        # SQLAlchemy Setup
+        # MATCH: Engine creation, connection pool config
+        # SKIP: Actual queries, table operations, schema work
+        'sqlalchemy_config': lambda n: (
+            FplitParser._is_stored_object_assignment(n, 'create_engine', 'create_engine') or
+            FplitParser._is_method_on_stored_object(n, ['pool_size', 'pool_timeout', 'pool_recycle'])
+        ),
+
+        # FastAPI Setup
+        # MATCH: App creation, middleware setup, basic config
+        # SKIP: Route definitions, actual endpoint handlers
+        'fastapi_config': lambda n: (
+            FplitParser._is_stored_object_assignment(n, 'FastAPI', 'FastAPI') or
+            FplitParser._is_method_on_stored_object(n, ['add_middleware', 'include_router']) and
+            not FplitParser._is_method_on_stored_object(n, ['get', 'post', 'put', 'delete'])
+        ),
+
+        # Seaborn Setup
+        # MATCH: Theme setting, style config, default parameters
+        # SKIP: Actual plot creation, data visualization
+        'seaborn_config': lambda n: (
+            FplitParser._is_call_to(n, 'sns', 'set_theme') or
+            FplitParser._is_call_to(n, 'sns', 'set_style') or
+            FplitParser._is_call_to(n, 'sns', 'set_context') or
+            FplitParser._is_call_to(n, 'sns', 'set_palette')
+        ),
+
+        # Plotly Setup
+        # MATCH: Template selection, renderer config
+        # SKIP: Figure creation, actual plotting
+        'plotly_config': lambda n: (
+            FplitParser._is_attr_assign(n, 'pio', 'templates.default') or
+            FplitParser._is_call_to(n, 'pio', 'renderers.default') or
+            FplitParser._is_call_to(n, 'pio', 'set_config')
+        ),
+
+        # NumPy Setup
+        # MATCH: Random seed, print options, error settings
+        # SKIP: Actual array operations, computations
+        'numpy_config': lambda n: (
+            FplitParser._is_call_to(n, 'np', 'random.seed') or
+            FplitParser._is_call_to(n, 'np', 'set_printoptions') or
+            FplitParser._is_call_to(n, 'np', 'seterr') or
+            FplitParser._is_call_to(n, 'np', 'seterrcall')
+        ),
+
+        # Pytest Setup
+        # MATCH: Skip conditions, import checking, config
+        # SKIP: Actual test functions, assertions
+        'pytest_config': lambda n: (
+            FplitParser._is_call_to(n, 'pytest', 'skip_if') or
+            FplitParser._is_call_to(n, 'pytest', 'importorskip') or
+            FplitParser._is_call_to(n, 'pytest', 'mark.skipif') or
+            FplitParser._is_call_to(n, 'pytest', 'fixture')
+        ),
+
+        # JAX Setup
+        # MATCH: Platform selection, precision config
+        # SKIP: Actual computations, transformations
+        'jax_config': lambda n: (
+            FplitParser._is_call_to(n, 'jax', 'config.update') or
+            FplitParser._is_call_to(n, 'jax', 'disable_jit') or
+            FplitParser._is_attr_assign(n, 'jax', 'config.x64_enabled')
+        ),
+
+        # OpenCV Setup
+        # MATCH: Threading config, window params
+        # SKIP: Actual image operations, video capture
+        'cv2_config': lambda n: (
+            FplitParser._is_call_to(n, 'cv2', 'setNumThreads') or
+            FplitParser._is_call_to(n, 'cv2', 'setUseOptimized') or
+            FplitParser._is_call_to(n, 'cv2', 'namedWindow')
+        ),
+        
+
+        'sklearn_random': lambda n: isinstance(n, ast.Assign) and
+                        any(isinstance(n.value, ast.Call) and
+                            isinstance(n.value.func, ast.Attribute) and
+                            n.value.func.attr == 'check_random_state'
+                            for target in n.targets),
+
+        # Scikit-learn Setup
+        # MATCH: Random state initialization, verbosity settings
+        # SKIP: Actual model creation, fitting, prediction
+        'sklearn_random': lambda n: (
+            FplitParser._is_stored_object_assignment(n, 'sklearn.utils', 'check_random_state') or
+            FplitParser._is_call_to(n, 'sklearn', 'set_config') or
+            # Handle both direct calls and stored instances
+            (isinstance(n, ast.Assign) and
+             isinstance(n.value, ast.Call) and
+             isinstance(n.value.func, ast.Attribute) and
+             n.value.func.attr == 'check_random_state')
+        ),
+
+        # Keras Setup
+        # MATCH: Backend config, image format, device settings
+        # SKIP: Model definition, training, prediction
+        'keras_config': lambda n: (
+            FplitParser._is_call_to(n, 'K', 'set_image_data_format') or
+            FplitParser._is_call_to(n, 'K', 'set_floatx') or
+            FplitParser._is_call_to(n, 'K', 'clear_session') or
+            # Handle stored backend configurations
+            FplitParser._is_method_on_stored_object(n, ['set_image_data_format', 'set_floatx', 'clear_session'])
+        ),
+        
+
+        # Ray Setup
+        # MATCH: Init config, resource setup
+        # SKIP: Actual distributed computations
+        'ray_config': lambda n: (
+            FplitParser._is_call_to(n, 'ray', 'init') or
+            FplitParser._is_call_to(n, 'ray', 'shutdown') or
+            FplitParser._is_method_on_stored_object(n, ['environment'])
+        ),
+
+        # Django Setup
+        # MATCH: Settings adjustment, middleware config
+        # SKIP: View definitions, URL patterns
+        'django_config': lambda n: (
+            FplitParser._is_attr_assign(n, 'settings') or
+            isinstance(n, ast.Call) and
+            isinstance(n.func, ast.Name) and
+            n.func.id == 'configure'
+        ),
+
+        # Warning Configuration
+        # MATCH: Warning filters, warning config
+        # SKIP: Actual warning raises
+        'warnings_config': lambda n: (
+            FplitParser._is_call_to(n, 'warnings', 'filterwarnings') or
+            FplitParser._is_call_to(n, 'warnings', 'simplefilter') or
+            FplitParser._is_call_to(n, 'warnings', 'resetwarnings')
+        ),
+
+        # Random Setup
+        # MATCH: Seed setting only
+        # SKIP: Actual random number generation
+        'random_config': lambda n: (
+            FplitParser._is_call_to(n, 'random', 'seed')
+        ),
+
+        # Environment Variables
+        # MATCH: Environment variable setting
+        # SKIP: Environment variable reading/usage
+        'environ': lambda n: (
+            isinstance(n, ast.Assign) and
+            isinstance(n.targets[0], ast.Subscript) and
+            isinstance(n.targets[0].value, ast.Attribute) and
+            isinstance(n.targets[0].value.value, ast.Name) and
+            n.targets[0].value.value.id == 'os' and
+            n.targets[0].value.attr == 'environ'
+        )
+    }

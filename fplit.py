@@ -112,9 +112,6 @@ class FplitParser:
              not FplitParser._is_method_on_stored_object(n, ['get', 'post', 'put', 'delete', 'patch']))
         ),
 
-
-
-
         # NumPy
         'numpy_config': lambda n: (
             FplitParser._is_call_to(n, 'np', 'set_printoptions') or
@@ -134,7 +131,7 @@ class FplitParser:
                        n.targets[0].value.value.id == 'plt' and
                        n.targets[0].value.attr == 'rcParams',
         
-# TensorFlow Setup
+        # TensorFlow Setup
         # MATCH: GPU/device config, random seeds, basic TF settings
         # SKIP: Model creation, training, inference
         'tf_config': lambda n: (
@@ -169,7 +166,7 @@ class FplitParser:
             not FplitParser._is_method_on_stored_object(n, ['get', 'post', 'put', 'delete'])
         ),
 
-# Seaborn Setup
+        # Seaborn Setup
         # MATCH: Theme setting, style config, default parameters
         # SKIP: Actual plot creation, data visualization
         'seaborn_config': lambda n: (
@@ -662,17 +659,31 @@ Examples:
     parser.add_argument('--similarity-threshold', type=float, default=0.5,
                        help='Threshold for print statement similarity matching (0.0-1.0)')
     
+    # Pattern loading options
+    parser.add_argument('--patterns-dir', 
+                       help='Directory containing custom pattern definitions')
+    parser.add_argument('--skip-user-patterns', action='store_true',
+                       help='Skip loading user pattern overrides')
+    parser.add_argument('--skip-project-patterns', action='store_true',
+                       help='Skip loading project-specific patterns')
+
     args = parser.parse_args()
     
     try:
-
+        pattern_loader = PatternLoader(
+            skip_user_patterns=args.skip_user_patterns,
+            skip_project_patterns=args.skip_project_patterns,
+            patterns_dir=args.patterns_dir
+        )
+        
         splitter = FplitParser(
-            args.source_file,
+            source_file=args.source_file,
+            pattern_loader=pattern_loader,
             disabled_patterns=args.disable_patterns,
             enabled_patterns=args.enable_patterns,
             similarity_threshold=args.similarity_threshold
         )
-
+        
         if args.list_patterns:
             print("Available setup patterns:")
             for pattern in splitter.get_available_patterns(): 
