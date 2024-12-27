@@ -89,9 +89,9 @@ Running:
 python fplit.py demo.py
 ```
 
-Creates separate files for each function call, preserving necessary setup:
+Creates separate files for each function call, preserving necessary setup, comments, and print statements:
 ```python
-# process_data_demo.py
+### created file: process_data_demo.py
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
@@ -103,8 +103,9 @@ if __name__ == "__main__":
     data = process_data(sample_input)
     print("Data processed successfully")
     exit(0)
-
-# plot_results_demo.py
+```
+``` python
+### created file: plot_results_demo.py
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
@@ -153,7 +154,8 @@ fplit intelligently detects and preserves setup code for many popular Python lib
 - **Random**: Seed setting (but not generation)
 - **Environment Variables**: Environment variable setting
 
-## Setup Patterns Configuration Guide
+### Setup Patterns Configuration Guide
+[Setup Patterns Configuration Guide](https://github.com/scottvr/fplit/blob/main/Pattern_Configuration_Guide.md)
 
 ## Development
 
