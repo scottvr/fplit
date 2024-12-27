@@ -40,24 +40,31 @@ python fplit.py demo.py -vv             # Show detailed debug info
 ### Command Line Options
 
 ```
-usage: fplit [-h] [-o OUTPUT_DIR] [-v] [--wrap-main] [--no-setup] [--show-setup]
-             [--list-patterns] [--disable-patterns PATTERN [PATTERN ...]]
-             [--enable-patterns PATTERN [PATTERN ...]]
-             source_file
+usage: fplit.py [-h] [-o OUTPUT_DIR] [-v] [--wrap-main] [--no-setup]        
+                [--list-patterns]
+                [--disable-patterns PATTERN [PATTERN ...]]
+                [--enable-patterns PATTERN [PATTERN ...]] [--show-setup]    
+                [--patterns-dir PATTERNS_DIR] [--skip-user-patterns]        
+                [--skip-project-patterns]
+                source_file
 
 positional arguments:
   source_file           Python source file to split
 
 optional arguments:
-  -h, --help           show help message and exit
-  -o OUTPUT_DIR        output directory for split files (default: current directory)
-  -v, --verbose        increase output verbosity (use -v or -vv)
-  --wrap-main          always wrap code in __main__ blocks
-  --no-setup           skip preservation of module-level setup code
-  --show-setup         show detected module-level setup code without splitting
-  --list-patterns      list all available setup patterns
-  --disable-patterns   disable specific setup patterns
-  --enable-patterns    enable only specified patterns
+  -h, --help              show help message and exit
+  -o OUTPUT_DIR           output directory for split files (default: current directory)
+  -v, --verbose           increase output verbosity (use -v or -vv)
+  --wrap-main             always wrap code in __main__ blocks
+  --no-setup              skip preservation of module-level setup code
+  --show-setup            show detected module-level setup code without splitting
+  --list-patterns         list all available setup patterns
+  --disable-patterns      disable specific setup patterns
+  --enable-patterns       enable only specified patterns
+  --patterns-dir          directory containing custom pattern definitions
+  --skip-user-patterns    skip loading user pattern overrides
+  --skip-project-patterns skip loading project-specific patterns
+  --similarity-threshold  threshold for print statement similarity
 ```
 
 ### Example
