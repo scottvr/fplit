@@ -356,25 +356,16 @@ class FplitParser:
         if not isinstance(node.value, ast.Call) or not isinstance(node.value.func, ast.Name):
             return None
 
-        # Extract the print text if it's a string literal
-        print_text = ""
-        if node.value.args:
-            arg = node.value.args[0]
-            if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-                print_text = arg.value
-            elif isinstance(arg, ast.JoinedStr):  # f-strings
-                parts = []
-                for value in arg.values:
-                    if isinstance(value, ast.Constant):
-                        parts.append(value.value)
-                print_text = ''.join(parts)
-
-        # Calculate similarity to function name
+        print_text = self._extract_print_text(node)
         similarity = difflib.SequenceMatcher(None, print_text.lower(), 
                                            function_name.lower()).ratio()
+
         if self.debug:
-            print(f"Print similarity score for '{print_text}' to '{function_name}': {similarity}")
-            print(f"Threshold: {self.pattern_loader.similarity_threshold}")
+            print(f"Analyzing print statement: '{print_text}'")
+            print(f"Comparing to function: '{function_name}'")
+            print(f"Similarity score: {similarity}")
+            print(f"Current threshold: {self.similarity_threshold}")
+            print(f"Result: {'MATCH' if similarity > self.similarity_threshold else 'NO MATCH'}")
 
         return PrintContext(
             node=node,
@@ -382,6 +373,10 @@ class FplitParser:
             similarity_to_function=similarity,
             line_number=node.lineno
         )
+
+    def _should_include_print(self, print_context: PrintContext) -> bool:
+        """Determine if a print statement should be included with its function."""
+        return print_context.similarity_to_function > self.similarity_threshold
 
     def _extract_imports(self):
         """Extract all import statements from the source file."""
