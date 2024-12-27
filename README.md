@@ -91,7 +91,7 @@ python fplit.py demo.py
 
 Creates separate files for each function call, preserving necessary setup:
 ```python
-# process_data_demo.py
+### created file: process_data_demo.py
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     print("Data processed successfully")
     exit(0)
 
-# plot_results_demo.py
+### created file: plot_results_demo.py
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
