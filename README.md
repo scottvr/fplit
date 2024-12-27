@@ -103,7 +103,8 @@ if __name__ == "__main__":
     data = process_data(sample_input)
     print("Data processed successfully")
     exit(0)
-
+```
+``` python
 ### created file: plot_results_demo.py
 import logging
 import matplotlib.pyplot as plt
