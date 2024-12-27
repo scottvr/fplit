@@ -323,6 +323,7 @@ class FplitParser:
         self.available_patterns = set(self.setup_patterns.keys())
         self.disabled_patterns = set(disabled_patterns) if disabled_patterns else set()
         self.enabled_patterns = set(enabled_patterns) if enabled_patterns else self.available_patterns
+        self.similarity_threshold = similarity_threshold
 
 
         # Validate patterns
@@ -355,22 +356,16 @@ class FplitParser:
         if not isinstance(node.value, ast.Call) or not isinstance(node.value.func, ast.Name):
             return None
 
-        # Extract the print text if it's a string literal
-        print_text = ""
-        if node.value.args:
-            arg = node.value.args[0]
-            if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-                print_text = arg.value
-            elif isinstance(arg, ast.JoinedStr):  # f-strings
-                parts = []
-                for value in arg.values:
-                    if isinstance(value, ast.Constant):
-                        parts.append(value.value)
-                print_text = ''.join(parts)
-
-        # Calculate similarity to function name
+        print_text = self._extract_print_text(node)
         similarity = difflib.SequenceMatcher(None, print_text.lower(), 
                                            function_name.lower()).ratio()
+
+        if self.debug:
+            print(f"Analyzing print statement: '{print_text}'")
+            print(f"Comparing to function: '{function_name}'")
+            print(f"Similarity score: {similarity}")
+            print(f"Current threshold: {self.similarity_threshold}")
+            print(f"Result: {'MATCH' if similarity > self.similarity_threshold else 'NO MATCH'}")
 
         return PrintContext(
             node=node,
@@ -378,6 +373,10 @@ class FplitParser:
             similarity_to_function=similarity,
             line_number=node.lineno
         )
+
+    def _should_include_print(self, print_context: PrintContext) -> bool:
+        """Determine if a print statement should be included with its function."""
+        return print_context.similarity_to_function > self.similarity_threshold
 
     def _extract_imports(self):
         """Extract all import statements from the source file."""
@@ -463,7 +462,7 @@ class FplitParser:
                 if current_function:
                     # Analyze print statement for relevance
                     print_context = self._analyze_print_statement(stmt, current_function)
-                    if print_context and print_context.similarity_to_function > 0.5:
+                    if print_context and print_context.similarity_to_function > self.similarity_threshold:
                         current_block.append(stmt)
                 if current_block:  # Only add print if we're in a block
                     current_block.append(stmt)
@@ -650,23 +649,18 @@ Examples:
         """
     )
     
+    # File handling options
     parser.add_argument('source_file', help='Python source file to split')
     parser.add_argument('-o', '--output-dir', default='.',
                        help='Output directory for split files (default: current directory)')
-    parser.add_argument('-v', '--verbose', action='store_true',
-                       help='Show detailed progress while splitting')
-    parser.add_argument('--wrap-main', action='store_true',
-                       help='Always wrap code in __main__ blocks, even for implicit mains')
-    parser.add_argument('--no-setup', action='store_true',
-                       help='Skip preservation of module-level setup code')
-    parser.add_argument('--list-patterns', action='store_true',
-                       help='List all available setup patterns')
-    parser.add_argument('--disable-patterns', type=str, nargs='+', metavar='PATTERN',
-                       help='Disable specific setup patterns (e.g., --disable-patterns logging_config requests_config)')
-    parser.add_argument('--enable-patterns', type=str, nargs='+', metavar='PATTERN',
-                       help='Enable only specified patterns (takes precedence over --disable-patterns)')
-    parser.add_argument('--show-setup', action='store_true',
-                       help='Show detected module-level setup code without splitting')
+    
+    # Verbosity options
+    parser.add_argument('-v', '--verbose', action='count', default=0,
+                       help='Increase output verbosity (use -v or -vv)')
+    
+    # Analysis configuration
+    parser.add_argument('--similarity-threshold', type=float, default=0.5,
+                       help='Threshold for print statement similarity matching (0.0-1.0)')
     
     args = parser.parse_args()
     
@@ -675,7 +669,8 @@ Examples:
         splitter = FplitParser(
             args.source_file,
             disabled_patterns=args.disable_patterns,
-            enabled_patterns=args.enable_patterns
+            enabled_patterns=args.enable_patterns,
+            similarity_threshold=args.similarity_threshold
         )
 
         if args.list_patterns:
