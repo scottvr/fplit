@@ -153,7 +153,8 @@ fplit intelligently detects and preserves setup code for many popular Python lib
 - **Random**: Seed setting (but not generation)
 - **Environment Variables**: Environment variable setting
 
-## Setup Patterns Configuration Guide
+### Setup Patterns Configuration Guide
+[Setup Patterns Configuration Guide](https://github.com/scottvr/fplit/blob/main/Pattern_Configuration_Guide.md)
 
 ## Development
 
