@@ -2,12 +2,12 @@
 """
 fplit - A Python Module Splitting Tool
 
-The name 'fplit' is a playful combination of 'file' and 'split',
-with a typographical nod to the historical 'long s' (ſ) character -
-just as 'split' would have appeared as 'ſplit' in historical typography,
-we present 'fplit' as a tool for splitting Python files.
+The name 'fplit' - a combination of 'file' and 'split'- is a nod to the 
+historical 'long s' (ſ) character. Just as 'split' would have appeared 
+as 'ſplit' (or "fplit") in historical typography, we present 'fplit' as 
+a tool for splitting Python files.
 
-This tool intelligently splits Python modules containing multiple function
+fplit intelligently splits Python modules containing multiple function
 demonstrations in a __main__ block into separate files, preserving context,
 imports, and related code for each function.
 """
