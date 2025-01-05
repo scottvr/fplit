@@ -1,5 +1,7 @@
 """
-Default patterns shipped with fplit.
+Default patterns shipped with fplit. They are hardcoded in the module 
+and are provided here for inspiration and example.
+
 These patterns identify common setup code for popular Python libraries.
 """
 
