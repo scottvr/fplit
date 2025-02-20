@@ -1,5 +1,5 @@
 # fplit
-fplit reads in Python source files containing one or more function calls and intelligently splits them into separate, standalone script files (e.g., for creating unit tests or examples.) 
+fplit reads in Python source files containing one or more function calls and intelligently splits them into separate, standalone script files (e.g., to use as unit tests or examples.) 
 
 Necessary context such as imports, boilerplate setup code for well-known libraries, related statements such as print(), debug, comments,
 and docstrings are detected via proximity and a string similarity threshold, and will be added as apropriate to the main execution block 
