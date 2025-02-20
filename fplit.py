@@ -73,29 +73,6 @@ class FplitParser:
     def _is_function_def(cls, node) -> bool:
         """Check if node is a function definition."""
         return isinstance(node, ast.FunctionDef)
-
-    def extract_functions(self, output_dir: str = "."):
-        """Extract all function definitions to separate files."""
-        output_path = Path(output_dir)
-        output_path.mkdir(exist_ok=True)
-        
-        # Walk the AST looking for function definitions
-        for node in ast.walk(self.tree):
-            if self._is_function_def(node):
-                if self.debug:
-                    print(f"Found function: {node.name}")
-                
-                # Create file named after function
-                filename = output_path / f"{node.name}.py"
-                
-                # Get the function source code
-                func_source = astor.to_source(node)
-                
-                if self.verbose:
-                    print(f"📝 Creating {filename.name}...")
-                
-                with open(filename, 'w') as f:
-                    f.write(func_source)
                     
     setup_patterns = {
         # Logging Configuration
@@ -349,7 +326,8 @@ class FplitParser:
         self.disabled_patterns = set(disabled_patterns) if disabled_patterns else set()
         self.enabled_patterns = set(enabled_patterns) if enabled_patterns else self.available_patterns
         self.similarity_threshold = similarity_threshold
-
+        self.include_definitions = include_definitions
+        self.function_definitions = {}  # Store found definitions
 
         # Validate patterns
         unknown_disabled = self.disabled_patterns - self.available_patterns
@@ -581,58 +559,30 @@ class FplitParser:
         return [self.global_vars[name][0] for name in self.global_vars 
                 if any(usage in used_globals for usage in self.global_vars[name][1])]
 
-    def _generate_file_content(self, function_name: str, statements: List[ast.stmt], 
-                             comments: List[str], *, wrap_main: bool = False) -> str:
-        """Generate content for a new file."""
-        content = []
-        
-        # Add imports
-        content.extend(self.imports)
-        content.append("")  # Empty line after imports
-        
-        # Add required global variables
-        globals_nodes = self._get_required_globals(statements)
-        if globals_nodes:
-            content.append("# Global variables")
-            for node in globals_nodes:
-                content.append(astor.to_source(node).strip())
-            content.append("")  # Empty line after globals
-
-        # Add relevant comments as documentation
-        if comments:
-            content.append("\"\"\"")
-            for comment in comments:
-                if comment.startswith('#'):
-                    content.append(comment[1:].strip())
-                else:
-                    content.append(comment)
-            content.append("\"\"\"")
-            content.append("")
-        
-
-
-        # Add the main content, optionally wrapped
-        if wrap_main:
-            content.append("if __name__ == '__main__':")
-            for stmt in statements:
-                stmt_str = astor.to_source(stmt).strip()
-                content.extend(f"    {line}" for line in stmt_str.split('\n'))
-            content.append("    exit(0)")
-        else:
-            for stmt in statements:
-                content.append(astor.to_source(stmt).strip())
-            content.append("exit(0) if __name__ == '__main__' else None")
-        
-        return "\n".join(content)
-
-    def split_into_files(self, output_dir: str = ".", verbose: bool = False, wrap_main: bool = False, no_setup: bool = False):
-        """Split the main block into separate files."""
+    def split_into_files(self, output_dir: str = ".", verbose: bool = False):
+        """Split the source file according to the specified mode."""
+        output_path = Path(output_dir)
+        output_path.mkdir(exist_ok=True)
         self.verbose = verbose
+
+        if self.funcdefs_only:
+            # Just output the collected definitions
+            for func_name, func_node in self.function_definitions.items():
+                filename = output_path / f"{func_name}.py"
+                if self.verbose:
+                    print(f"📝 Creating {filename.name}...")
+                
+                with open(filename, 'w') as f:
+                    f.write(astor.to_source(func_node))
+            
+            if self.verbose:
+                print(f"\n📚 Created {len(self.function_definitions)} function files")
+            return
+
+        # Normal demo file generation
         main_statements = self._find_main_block()
         if not main_statements:
             raise ValueError("No executable statements found in the source file")
-        output_path = Path(output_dir)
-        output_path.mkdir(exist_ok=True)
 
         function_blocks = self._extract_function_blocks(main_statements)
         
@@ -646,7 +596,7 @@ class FplitParser:
             filename = output_path / f"{safe_name}_demo.py"
             created_files.append(filename)
             
-            if verbose:
+            if self.verbose:
                 print(f"📝 Creating {filename.name}...")
             
             content = self._generate_file_content(function_name, statements, comments)
@@ -654,11 +604,60 @@ class FplitParser:
             with open(filename, 'w') as f:
                 f.write(content)
         
-        if verbose:
+        if self.verbose:
             print(f"\n📚 Created {len(created_files)} files:")
             for file in created_files:
                 print(f"   - {file.name}")
 
+    def _generate_file_content(self, function_name: str, statements: List[ast.stmt], 
+                             comments: List[str]) -> str:
+        """Generate content for a new file."""
+        content = []
+        
+        # Add generated-by comment
+        content.append(f"# Generated by fplit from {self.source_file.name}")
+        content.append("")
+        
+        # Add imports
+        content.extend(self.imports)
+        content.append("")
+
+        # Add required global variables
+        globals_nodes = self._get_required_globals(statements)
+        if globals_nodes:
+            content.append("# Global variables")
+            for node in globals_nodes:
+                content.append(astor.to_source(node).strip())
+            content.append("")
+
+        # Add function definition if available and enabled
+        if self.include_definitions and function_name in self.function_definitions:
+            if self.debug:
+                print(f"Including definition for {function_name}")
+            func_def = astor.to_source(self.function_definitions[function_name])
+            content.append(func_def)
+            content.append("")
+
+        # Add docstring from comments if any
+        if comments:
+            content.append('"""')
+            for comment in comments:
+                if comment.startswith('#'):
+                    content.append(comment[1:].strip())
+                else:
+                    content.append(comment)
+            content.append('"""')
+            content.append("")
+        
+        # Add the main content
+        content.append("if __name__ == '__main__':")
+        for stmt in statements:
+            stmt_str = astor.to_source(stmt).strip()
+            content.extend(f"    {line}" for line in stmt_str.split('\n'))
+        content.append("    exit(0)")
+            
+        return "\n".join(content)
+                                 
 if __name__ == '__main__':
     import argparse
     
