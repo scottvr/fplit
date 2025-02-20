@@ -69,8 +69,9 @@ python fplit.py demo.py -v              # Show progress
 python fplit.py demo.py -vv             # Show detailed debug info
 ```
 
-### Example - Extracting functions into single-purpose fully-runnable scripts demonstrating one specific function
+### Example - Function Call Extraction and Demonstration
 
+The default mode of operation is to extract function *calls* into single-purpose fully-runnable scripts, each demonstrating one specific function
 Given the following as input file `demo.py`:
 ```python
 import logging
