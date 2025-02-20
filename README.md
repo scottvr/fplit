@@ -26,13 +26,6 @@ Or, if the source contains function _*definitions*_, and the generated files are
 - Smart detection and inclusion of related print statements and comments (or optionally, not)
 - Configurable pattern matching for setup code detection
 
-## Installation
-
-```bash
-git clone https://github.com/scottvr/fplit.git
-cd fplit
-python -m pip install -r requirements.txt
-```
 
 ## Command Line Options
 
@@ -220,7 +213,7 @@ This is particularly useful when:
 - Building a catalog of implementation patterns
 - Preparing code examples for documentation
  
-## Setup Pattern Detection
+## Common Python Library Setup Pattern Detection
 
 fplit intelligently detects and preserves setup code for many popular Python libraries. Here's what each pattern matches:
 
@@ -254,6 +247,14 @@ fplit intelligently detects and preserves setup code for many popular Python lib
 
 ### Setup Patterns Configuration Guide
 [Setup Patterns Configuration Guide](https://github.com/scottvr/fplit/blob/main/Pattern_Configuration_Guide.md)
+
+## Installation
+
+```bash
+git clone https://github.com/scottvr/fplit.git
+cd fplit
+python -m pip install -r requirements.txt
+```
 
 ## TODO
 
