@@ -228,13 +228,6 @@ class FplitParser:
             FplitParser._is_call_to(n, 'cv2', 'namedWindow')
         ),
         
-
-        'sklearn_random': lambda n: isinstance(n, ast.Assign) and
-                        any(isinstance(n.value, ast.Call) and
-                            isinstance(n.value.func, ast.Attribute) and
-                            n.value.func.attr == 'check_random_state'
-                            for target in n.targets),
-
         # Scikit-learn Setup
         # MATCH: Random state initialization, verbosity settings
         # SKIP: Actual model creation, fitting, prediction
