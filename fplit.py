@@ -115,15 +115,6 @@ class FplitParser:
              not FplitParser._is_method_on_stored_object(n, ['get', 'post', 'put', 'delete', 'patch']))
         ),
 
-        # NumPy
-        'numpy_config': lambda n: (
-            FplitParser._is_call_to(n, 'np', 'set_printoptions') or
-            FplitParser._is_call_to(n, 'np', 'random.seed.')
-        ),
-        
-        # Pandas
-        'pandas_options': lambda n: FplitParser._is_call_to(n, 'pd', 'set_option'),
-        
         # Matplotlib
         'matplotlib_backend': lambda n: FplitParser._is_call_to(n, 'matplotlib', 'use'),
         'plt_style': lambda n: FplitParser._is_call_to(n, 'plt', 'style.use'),
@@ -226,13 +217,6 @@ class FplitParser:
             FplitParser._is_call_to(n, 'cv2', 'namedWindow')
         ),
         
-
-        'sklearn_random': lambda n: isinstance(n, ast.Assign) and
-                        any(isinstance(n.value, ast.Call) and
-                            isinstance(n.value.func, ast.Attribute) and
-                            n.value.func.attr == 'check_random_state'
-                            for target in n.targets),
-
         # Scikit-learn Setup
         # MATCH: Random state initialization, verbosity settings
         # SKIP: Actual model creation, fitting, prediction
@@ -257,7 +241,6 @@ class FplitParser:
             FplitParser._is_method_on_stored_object(n, ['set_image_data_format', 'set_floatx', 'clear_session'])
         ),
         
-
         # Ray Setup
         # MATCH: Init config, resource setup
         # SKIP: Actual distributed computations
