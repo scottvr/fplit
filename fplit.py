@@ -68,7 +68,35 @@ class FplitParser:
                 isinstance(node.value.func.value, ast.Name) and
                 node.value.func.value.id == module and
                 node.value.func.attr == factory_method)
-    
+
+    @classmethod
+    def _is_function_def(cls, node) -> bool:
+        """Check if node is a function definition."""
+        return isinstance(node, ast.FunctionDef)
+
+    def extract_functions(self, output_dir: str = "."):
+        """Extract all function definitions to separate files."""
+        output_path = Path(output_dir)
+        output_path.mkdir(exist_ok=True)
+        
+        # Walk the AST looking for function definitions
+        for node in ast.walk(self.tree):
+            if self._is_function_def(node):
+                if self.debug:
+                    print(f"Found function: {node.name}")
+                
+                # Create file named after function
+                filename = output_path / f"{node.name}.py"
+                
+                # Get the function source code
+                func_source = astor.to_source(node)
+                
+                if self.verbose:
+                    print(f"📝 Creating {filename.name}...")
+                
+                with open(filename, 'w') as f:
+                    f.write(func_source)
+                    
     setup_patterns = {
         # Logging Configuration
         # MATCH: Logger creation and level setting, propagation config
@@ -658,7 +686,8 @@ Examples:
     # Analysis configuration
     parser.add_argument('--similarity-threshold', type=float, default=0.5,
                        help='Threshold for print statement similarity matching (0.0-1.0)')
-    
+    parser.add_argument('--funcdefs-only', action='store_true',
+                       help='Extract only function definitions to separate files')
     # Pattern loading options
     parser.add_argument('--patterns-dir', 
                        help='Directory containing custom pattern definitions')
@@ -690,12 +719,14 @@ Examples:
                 print(f"  - {pattern}")
             exit(0)
 
-        if args.verbose:
-            print(f"🔍 Analyzing {args.source_file}...")
+        if args.funcdefs_only:
+            if args.verbose:
+                print(f"🔍 Extracting functions from {args.source_file}...")
+            splitter.extract_functions(args.output_dir)
+        else:
+            splitter.split_into_files(args.output_dir, args.verbose, args.wrap_main, args.no_setup)
         
-        splitter.split_into_files(args.output_dir, args.verbose, args.wrap_main, args.no_setup)
-        
-        if args.verbose:
+x            if args.verbose:
             print("✨ Done! Your file has been ſplit into separate function demos.")        
 
     except FileNotFoundError as e:
