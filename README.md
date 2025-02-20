@@ -1,14 +1,12 @@
 # fplit
 
-A Python script splitting tool that intelligently separates function calls from a single file into individual files (e.g., for tests or demo purposes) while preserving setup context.
-
-Though the docs still repeatedly refer to "demonstration", it's well beyond its initial purpose of splitting an example usage file into multiple files, hence the reason I am sharing it.
+A Python source code file-splitting tool that intelligently separates function calls from within a single file into individual files (e.g., for tests or demo purposes) while preserving setup and calling context (or, optionally, not).
 
 The name 'fplit' is a combination of 'file' and 'split', with a typographical nod to the historical 'long s' (ſ) character; 'split' would have appeared as 'ſplit' in historical typography.
 
 ## Overview
 
-`fplit` takes Python scripts containing multiple function demonstrations (typically in a `__main__` block or at module level) and splits them into separate, self-contained files. It intelligently preserves necessary context like imports, setup code, and related statements.
+`fplit` reads in Python source files containing one or more function calls (typically in a `__main__` block or at module level) and splits them into separate, self-contained files. Necessary context for successful execution of the functions (such as imports, setup code, and related statements) is preserved from the source file and added to the main execution block of each generated script. (Or, if the generated files are not intended for execution, this context can be skipped.)
 
 ### Key Features
 
