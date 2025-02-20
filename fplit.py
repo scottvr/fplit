@@ -706,6 +706,7 @@ Examples:
         
         splitter = FplitParser(
             source_file=args.source_file,
+            funcdefs_only=args.funcdefs_only,
             pattern_loader=pattern_loader,
             disabled_patterns=args.disable_patterns,
             enabled_patterns=args.enable_patterns,
@@ -718,15 +719,10 @@ Examples:
                 print(f"  - {pattern}")
             exit(0)
 
-        if args.funcdefs_only:
-            if args.verbose:
-                print(f"🔍 Extracting functions from {args.source_file}...")
-            splitter.extract_functions(args.output_dir)
-        else:
-            splitter.split_into_files(args.output_dir, args.verbose, args.wrap_main, args.no_setup)
+        splitter.split_into_files(args.output_dir, args.verbose, args.wrap_main, args.no_setup)
         
-x            if args.verbose:
-            print("✨ Done! Your file has been ſplit into separate function demos.")        
+x       if args.verbose:
+            print("✨ Done! Your file has been ſplit into separate files by function.")        
 
     except FileNotFoundError as e:
         print(f"Error: Could not find file '{args.source_file}'")
