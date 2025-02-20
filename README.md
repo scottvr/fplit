@@ -1,8 +1,14 @@
 # fplit
+fplit reads in Python source files containing one or more function calls and intelligently splits them into separate, standalone script files (e.g., for creating unit tests or examples.) 
 
-A Python source code file-splitting tool that intelligently separates function calls from within a single file into individual files (e.g., for tests or demo purposes) while preserving setup and calling context (or, optionally, not).
+Necessary context such as imports, boilerplate setup code for well-known libraries, related statements such as print(), debug, comments,
+and docstrings are detected via proximity and a string similarity threshold, and will be added as apropriate to the main execution block 
+of each generated script file (one file per function).
 
-The name 'fplit' is a combination of 'file' and 'split', with a typographical nod to the historical 'long s' (ſ) character; 'split' would have appeared as 'ſplit' in historical typography.
+If the generated files are not intended for execution (e.g., they are generated as docs or other reference purposes) the aforementioned 
+context can be omitted by passing the --funcdefs-only option to fplit on the command-line.
+
+The name 'fplit' is a combination of 'file' and 'split', with a typographical nod to the historical 'long s' (ſ) character; 'split' would have appeared as 'ſplit' in historical typography, which often looks like an 'f' to a modern day reader.
 
 ## Overview
 
