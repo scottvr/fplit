@@ -14,10 +14,10 @@ Or, if the source contains function _*definitions*_, and the generated files are
 
 - Splits Python files into function-call-specific demonstration files
   - alternatively, into function-specific files containing only the actual function definition (e.g., for reference/documentation purposes)
-- Intelligently preserves setup code and configuration
-- Maintains imports and necessary context
+- Intelligently preserves setup code and configuration (or optionally, doesn't)
+- Maintains imports and necessary context (or optionally, doesn't)
 - Handles both explicit `__main__` blocks and module-level code
-- Smart detection of related print statements and comments
+- Smart detection and inclusion of related print statements and comments (or optionally, not)
 - Configurable pattern matching for setup code detection
 
 ## Installation
