@@ -13,6 +13,7 @@ The name 'fplit' is a combination of 'file' and 'split', with a typographical no
 ### Key Features
 
 - Splits Python files into function-specific demonstration files
+  - alternatively, into function-specific files containing only the actual function definition (e.g., for reference/documentation purposes)
 - Intelligently preserves setup code and configuration
 - Maintains imports and necessary context
 - Handles both explicit `__main__` blocks and module-level code
@@ -27,17 +28,7 @@ cd fplit
 python -m pip install -r requirements.txt
 ```
 
-## Usage
-
-Basic usage:
-```bash
-python fplit.py demo.py                 # Split into current directory
-python fplit.py demo.py -o output_dir   # Split into specified directory
-python fplit.py demo.py -v              # Show progress
-python fplit.py demo.py -vv             # Show detailed debug info
-```
-
-### Command Line Options
+## Command Line Options
 
 ```
 usage: fplit.py [-h] [-o OUTPUT_DIR] [-v] [--wrap-main] [--no-setup]        
@@ -57,6 +48,7 @@ optional arguments:
   -v, --verbose           increase output verbosity (use -v or -vv)
   --wrap-main             always wrap code in __main__ blocks
   --no-setup              skip preservation of module-level setup code
+  --funcdefs-only         extracts only function definitions to unique files
   --show-setup            show detected module-level setup code without splitting
   --list-patterns         list all available setup patterns
   --disable-patterns      disable specific setup patterns
@@ -67,9 +59,19 @@ optional arguments:
   --similarity-threshold  threshold for print statement similarity
 ```
 
-### Example
+## Usage
 
-Given an input file `demo.py`:
+Basic usage:
+```bash
+python fplit.py demo.py                 # Split into current directory
+python fplit.py demo.py -o output_dir   # Split into specified directory
+python fplit.py demo.py -v              # Show progress
+python fplit.py demo.py -vv             # Show detailed debug info
+```
+
+### Example - Extracting functions into single-purpose fully-runnable scripts demonstrating one specific function
+
+Given the following as input file `demo.py`:
 ```python
 import logging
 import matplotlib.pyplot as plt
@@ -96,9 +98,9 @@ Running:
 python fplit.py demo.py
 ```
 
-Creates separate files for each function call, preserving necessary setup, comments, and print statements:
+will create separate files for each function call, preserving necessary setup, comments, and print statements:
 ```python
-### created file: process_data_demo.py
+### generated file: process_data_demo.py
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
@@ -112,7 +114,7 @@ if __name__ == "__main__":
     exit(0)
 ```
 ``` python
-### created file: plot_results_demo.py
+### generated file: plot_results_demo.py
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
@@ -129,6 +131,88 @@ if __name__ == "__main__":
     exit(0)
 ```
 
+### Example - Function Reference Extraction
+
+This mode extracts only the pure function definitions from your source code. This is useful for creating reference libraries or cataloging implementations:
+
+Given the following as an input file:
+```python
+import numpy as np
+from typing import List
+
+def quicksort(arr: List[int]) -> List[int]:
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quicksort(left) + middle + quicksort(right)
+
+def binary_search(arr: List[int], target: int) -> int:
+    left, right = 0, len(arr) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1
+
+if __name__ == "__main__":
+    test_arr = [3, 6, 8, 10, 1, 2, 1]
+    sorted_arr = quicksort(test_arr)
+    idx = binary_search(sorted_arr, 6)
+```
+
+Running:
+```bash
+python fplot.py source.py --funcdefs-only
+```
+
+will create separate files for each function call, _*NOT*_ preserving any surrounding setup, comments, etc:
+
+```python
+### generated file: quicksort.py
+def quicksort(arr: List[int]) -> List[int]:
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quicksort(left) + middle + quicksort(right)
+```
+```python
+### generated file: binary_search.py
+def binary_search(arr: List[int], target: int) -> int:
+    left, right = 0, len(arr) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1
+```
+
+This mode:
+- Extracts only function definitions
+- Names files directly after the functions
+- Excludes imports, setup code, and main blocks
+- Preserves function signatures and type hints
+- Creates a clean reference library of implementations
+
+This is particularly useful when:
+- Creating an algorithm reference library
+- Extracting reusable functions from existing code
+- Building a catalog of implementation patterns
+- Preparing code examples for documentation
+ 
 ## Setup Pattern Detection
 
 fplit intelligently detects and preserves setup code for many popular Python libraries. Here's what each pattern matches:
@@ -164,20 +248,15 @@ fplit intelligently detects and preserves setup code for many popular Python lib
 ### Setup Patterns Configuration Guide
 [Setup Patterns Configuration Guide](https://github.com/scottvr/fplit/blob/main/Pattern_Configuration_Guide.md)
 
-## Development
+## TODO
 
-Contributions are welcome! Here are some areas that could use enhancement:
+Contributions are welcome. Here are some things on the todo list:
 
 - Additional setup patterns for other popular libraries
-- Smart handling of function dependencies
+- Smarter handling of function dependencies
 - Support for async/await syntax
 - Configuration file support
-- Integration with IDE tools
 
 ## License
 
 MIT
-
-## Contributing
-
-Sure!
