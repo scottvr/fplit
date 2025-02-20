@@ -570,13 +570,13 @@ class FplitParser:
             for func_name, func_node in self.function_definitions.items():
                 filename = output_path / f"{func_name}.py"
                 if self.verbose:
-                    print(f"📝 Creating {filename.name}...")
+                    print(f".. Creating {filename.name}...")
                 
                 with open(filename, 'w') as f:
                     f.write(astor.to_source(func_node))
             
             if self.verbose:
-                print(f"\n📚 Created {len(self.function_definitions)} function files")
+                print(f"\n.. Created {len(self.function_definitions)} function files")
             return
 
         # Normal demo file generation
@@ -597,7 +597,7 @@ class FplitParser:
             created_files.append(filename)
             
             if self.verbose:
-                print(f"📝 Creating {filename.name}...")
+                print(f".. Creating {filename.name}...")
             
             content = self._generate_file_content(function_name, statements, comments)
             
