@@ -721,8 +721,8 @@ Examples:
 
         splitter.split_into_files(args.output_dir, args.verbose, args.wrap_main, args.no_setup)
         
-x       if args.verbose:
-            print("✨ Done! Your file has been ſplit into separate files by function.")        
+        if args.verbose:
+            print("Done! Your file has been ſplit into separate files by function.")        
 
     except FileNotFoundError as e:
         print(f"Error: Could not find file '{args.source_file}'")
