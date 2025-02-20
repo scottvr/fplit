@@ -1,8 +1,14 @@
 # fplit
+fplit reads in Python source files containing one or more function calls and intelligently splits them into separate, standalone script files (e.g., to use as unit tests or examples.) 
 
-A Python source code file-splitting tool that intelligently separates function calls from within a single file into individual files (e.g., for tests or demo purposes) while preserving setup and calling context (or, optionally, not).
+Necessary context such as imports, boilerplate setup code for well-known libraries, related statements such as print(), debug, comments,
+and docstrings are detected via proximity and a string similarity threshold, and will be added as apropriate to the main execution block 
+of each generated script file (one file per function).
 
-The name 'fplit' is a combination of 'file' and 'split', with a typographical nod to the historical 'long s' (ſ) character; 'split' would have appeared as 'ſplit' in historical typography.
+If the generated files are not intended for execution (e.g., they are generated as docs or other reference purposes) the aforementioned 
+context can be omitted by passing the --funcdefs-only option to fplit on the command-line.
+
+The name 'fplit' is a combination of 'file' and 'split', with a typographical nod to the historical 'long s' (ſ) character; 'split' would have appeared as 'ſplit' in historical typography, which often looks like an 'f' to a modern day reader.
 
 ## Overview
 
@@ -20,13 +26,6 @@ Or, if the source contains function _*definitions*_, and the generated files are
 - Smart detection and inclusion of related print statements and comments (or optionally, not)
 - Configurable pattern matching for setup code detection
 
-## Installation
-
-```bash
-git clone https://github.com/scottvr/fplit.git
-cd fplit
-python -m pip install -r requirements.txt
-```
 
 ## Command Line Options
 
@@ -214,7 +213,7 @@ This is particularly useful when:
 - Building a catalog of implementation patterns
 - Preparing code examples for documentation
  
-## Setup Pattern Detection
+## Common Python Library Setup Pattern Detection
 
 fplit intelligently detects and preserves setup code for many popular Python libraries. Here's what each pattern matches:
 
@@ -248,6 +247,14 @@ fplit intelligently detects and preserves setup code for many popular Python lib
 
 ### Setup Patterns Configuration Guide
 [Setup Patterns Configuration Guide](https://github.com/scottvr/fplit/blob/main/Pattern_Configuration_Guide.md)
+
+## Installation
+
+```bash
+git clone https://github.com/scottvr/fplit.git
+cd fplit
+python -m pip install -r requirements.txt
+```
 
 ## TODO
 
