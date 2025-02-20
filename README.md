@@ -6,11 +6,13 @@ The name 'fplit' is a combination of 'file' and 'split', with a typographical no
 
 ## Overview
 
-`fplit` reads in Python source files containing one or more function calls (typically in a `__main__` block or at module level) and splits them into separate, self-contained files. Necessary context for successful execution of the functions (such as imports, setup code, and related statements) is preserved from the source file and added to the main execution block of each generated script. (Or, if the generated files are not intended for execution, this context can be skipped.)
+`fplit` reads in Python source files containing one or more function _*calls*_ (typically in a `__main__` block or at module level) and splits them into separate, self-contained files. Necessary context for successful execution of the functions (such as imports, setup code, and related statements) is preserved from the source file and added to the main execution block of each generated script. 
+
+Or, if the source contains function _*definitions*_, and the generated files are not intended for execution, this context can be skipped via the --funcdefs-only option.
 
 ### Key Features
 
-- Splits Python files into function-specific demonstration files
+- Splits Python files into function-call-specific demonstration files
   - alternatively, into function-specific files containing only the actual function definition (e.g., for reference/documentation purposes)
 - Intelligently preserves setup code and configuration
 - Maintains imports and necessary context
