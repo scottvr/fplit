@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 """
-fplit - A Python Module Splitting Tool
+fplit reads in Python source files containing one or more function calls and splits them into separate, standalone script files. 
 
-The name 'fplit' - a combination of 'file' and 'split'- is a nod to the 
-historical 'long s' (ſ) character. Just as 'split' would have appeared 
-as 'ſplit' (or "fplit") in historical typography, we present 'fplit' as 
-a tool for splitting Python files.
+Necessary context such as imports, boilerplate setup code for well-known libraries, related statements such as print(), debug, comments,
+and docstrings are detected via proximity and a string similarity threshold, and will be added as apropriate to the main execution block 
+of each generated script file (one file per function).
 
-fplit intelligently splits Python modules containing multiple function
-demonstrations in a __main__ block into separate files, preserving context,
-imports, and related code for each function.
+If the generated files are not intended for execution (e.g., they are generated as docs or other reference purposes) the aforementioned 
+context can be omitted by passing the --funcdefs-only option to fplit on the command-line.
 """
 
 import ast
